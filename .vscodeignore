@@ -1,0 +1,13 @@
+.vscode/**
+.vscode-test/**
+out/test/**
+src/**
+.gitignore
+.yarnrc
+**/tsconfig.json
+**/.eslintrc.json
+**/*.map
+**/*.ts
+finance/
+finance.zip
+*.db
