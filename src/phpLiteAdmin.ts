@@ -116,7 +116,8 @@ export class PhpLiteAdminProvider implements vscode.CustomEditorProvider<SQLiteD
 		webviewPanel.webview.options = {
 			enableScripts: true,
 		};
-		webviewPanel.webview.html = this.getHtmlForWebview(webviewPanel.webview, document.uri);
+
+		webviewPanel.webview.html = this.getHtmlForWebview(webviewPanel.webview, process.env.CODESPACE_NAME);
 
 		webviewPanel.webview.onDidReceiveMessage(e => this.onMessage(document, e));
 
@@ -140,7 +141,7 @@ export class PhpLiteAdminProvider implements vscode.CustomEditorProvider<SQLiteD
 		});
 	}
 
-	private getHtmlForWebview(webview: vscode.Webview, document: vscode.Uri): string {
+	private getHtmlForWebview(webview: vscode.Webview, codespace_name: string): string {
 
 		return /* html */`
 			<!DOCTYPE html>
@@ -152,8 +153,7 @@ export class PhpLiteAdminProvider implements vscode.CustomEditorProvider<SQLiteD
 				<title>phpLiteAdmin</title>
 			</head>
 			<body>
-			<h1>${document}</h1>
-			<iframe src="TODO" style="position:fixed; top:0; left:0; bottom:0; right:0; width:100%; height:100%; border:none; margin:0; padding:0; overflow:hidden; z-index:999999;">/iframe>
+			<iframe src="https://${codespace_name}-8082.githubpreview.dev/" style="position:fixed; top:0; left:0; bottom:0; right:0; width:100%; height:100%; border:none; margin:0; padding:0; overflow:hidden; z-index:999999;">/iframe>
 			</body>
 			</html>`;
 	}
