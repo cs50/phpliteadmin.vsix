@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
+import { PhpLiteAdminProvider } from './phpLiteAdmin';
 
 export function activate(context: vscode.ExtensionContext) {
-    console.log("activated");
+    context.subscriptions.push(PhpLiteAdminProvider.register(context));
 }

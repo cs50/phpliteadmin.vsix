@@ -15,6 +15,20 @@
         "onStartupFinished"
     ],
     "main": "./out/extension.js",
+    "contributes": {
+        "customEditors": [
+            {
+                "viewType": "cs50.phpliteadmin",
+                "displayName": "phpLiteAdmin",
+                "selector": [
+                    {
+                        "filenamePattern": "*.db"
+                    }
+                ],
+                "priority": "default"
+            }
+        ]
+    },
     "scripts": {
         "vscode:prepublish": "npm run compile",
         "compile": "tsc -p ./",
