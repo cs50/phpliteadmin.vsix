@@ -109,51 +109,38 @@ export class PhpLiteAdminProvider implements vscode.CustomEditorProvider<SQLiteD
 		webviewPanel: vscode.WebviewPanel,
 		_token: vscode.CancellationToken
 	): Promise<void> {
+
+		// Create new terminal and start php server
+		const terminal = vscode.window.createTerminal("phpLiteAdmin");
+		terminal.sendText(`phpliteadmin ${document.uri.path}`);
+
 		// Add the webview to our internal set of active webviews
-		this.webviews.add(document.uri, webviewPanel);
+		this.webviews.add(document.uri, webviewPanel, terminal);
 
 		// Setup initial content for the webview
 		webviewPanel.webview.options = {
 			enableScripts: true,
 		};
 
-		webviewPanel.webview.html = this.getHtmlForWebview(webviewPanel.webview, process.env.CODESPACE_NAME);
+		const preview_url = `https://${process.env.CODESPACE_NAME}-8082.githubpreview.dev/`;
 
-		webviewPanel.webview.onDidReceiveMessage(e => this.onMessage(document, e));
-
-		// Wait for the webview to be properly ready before we init
-		webviewPanel.webview.onDidReceiveMessage(e => {
-			if (e.type === 'ready') {
-				if (document.uri.scheme === 'untitled') {
-					this.postMessage(webviewPanel, 'init', {
-						untitled: true,
-						editable: true,
-					});
-				} else {
-					const editable = vscode.workspace.fs.isWritableFileSystem(document.uri.scheme);
-
-					this.postMessage(webviewPanel, 'init', {
-						value: document.documentData,
-						editable,
-					});
-				}
-			}
-		});
+		setTimeout(() => {
+			webviewPanel.webview.html = this.getHtmlForWebview(webviewPanel.webview, preview_url);
+		}, 3000);
 	}
 
-	private getHtmlForWebview(webview: vscode.Webview, codespace_name: string): string {
-
+	private getHtmlForWebview(webview: vscode.Webview, preview_url: string): string {
+		
 		return /* html */`
 			<!DOCTYPE html>
 			<html lang="en">
 			<head>
 				<meta charset="UTF-8">
 				<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 				<title>phpLiteAdmin</title>
 			</head>
 			<body>
-			<iframe src="https://${codespace_name}-8082.githubpreview.dev/" style="position:fixed; top:0; left:0; bottom:0; right:0; width:100%; height:100%; border:none; margin:0; padding:0; overflow:hidden; z-index:999999;">/iframe>
+			<iframe src=${preview_url} style="position:fixed; top:0; left:0; bottom:0; right:0; width:100%; height:100%; border:none; margin:0; padding:0; overflow:hidden; z-index:999999;">/iframe>
 			</body>
 			</html>`;
 	}
@@ -167,23 +154,6 @@ export class PhpLiteAdminProvider implements vscode.CustomEditorProvider<SQLiteD
 		panel.webview.postMessage({ type, requestId, body });
 		return p;
 	}
-
-	private postMessage(panel: vscode.WebviewPanel, type: string, body: any): void {
-		panel.webview.postMessage({ type, body });
-	}
-
-	private onMessage(document: SQLiteDocument, message: any) {
-		switch (message.type) {
-
-			case 'response':
-				{
-					const callback = this._callbacks.get(message.requestId);
-					callback?.(message.body);
-					return;
-				}
-		}
-	}
-
 
 	private readonly _onDidChangeCustomDocument = new vscode.EventEmitter<vscode.CustomDocumentEditEvent<SQLiteDocument>>();
 	public readonly onDidChangeCustomDocument = this._onDidChangeCustomDocument.event;
@@ -203,7 +173,6 @@ export class PhpLiteAdminProvider implements vscode.CustomEditorProvider<SQLiteD
 	public backupCustomDocument(document: SQLiteDocument, context: vscode.CustomDocumentBackupContext, cancellation: vscode.CancellationToken): Thenable<vscode.CustomDocumentBackup> {
 		return;
 	}
-
 }
 
 
@@ -232,12 +201,11 @@ export class PhpLiteAdminProvider implements vscode.CustomEditorProvider<SQLiteD
 	/**
 	 * Add a new webview to the collection.
 	 */
-	public add(uri: vscode.Uri, webviewPanel: vscode.WebviewPanel) {
+	public add(uri: vscode.Uri, webviewPanel: vscode.WebviewPanel, terminal:vscode.Terminal) {
 		const entry = { resource: uri.toString(), webviewPanel };
 		this._webviews.add(entry);
-
 		webviewPanel.onDidDispose(() => {
-			this._webviews.delete(entry);
+			terminal.dispose();
 		});
 	}
 }
