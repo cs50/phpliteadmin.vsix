@@ -168,13 +168,20 @@ export class PhpLiteAdminProvider implements vscode.CustomEditorProvider<SQLiteD
 				<title>phpLiteAdmin</title>
 			</head>
 			<body style="background-color: #ffffff;">
-			<div id=phpliteadmin>
-				<iframe src=${preview_url} style="position:fixed; top:0; left:0; bottom:0; right:0; width:100%; height:100%; border:none; margin:0; padding:0; overflow:hidden;"></iframe>
-				<h4 style="position: fixed;margin-left:10px; left: 0; bottom: 0; width: 100%; color: #000000; z-index:999999;">
+			<div>
+				<div id=phpliteadmin>
+					<h4 style="color: #000000;">Loading phpLiteAdmin in webview...</h4>
+				</div>
+					<h4 style="position: fixed;margin-left:10px; left: 0; bottom: 0; width: 100%; color: #000000; z-index:999999;">
 					phpLiteAdmin running on: <a href="${preview_url}" style="text-decoration: none;">${preview_url}</a> <a href="${preview_url}" style="text-decoration: none;">(view in browser)</a>
 				</h4>
 			</div>
 			</body>
+			<script>
+				setTimeout(() => {
+					document.getElementById("phpliteadmin").innerHTML='<iframe src=${preview_url} style="position:fixed; top:0; left:0; bottom:0; right:0; width:100%; height:100%; border:none; margin:0; padding:0; overflow:hidden;"></iframe>'
+				}, 3000)
+			</script>
 			</html>`;
 	}
 
