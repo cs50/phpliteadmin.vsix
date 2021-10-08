@@ -113,7 +113,6 @@ export class PhpLiteAdminProvider implements vscode.CustomEditorProvider<SQLiteD
 		// Create new terminal and start php server
 		const terminal = vscode.window.createTerminal("phpLiteAdmin");
 		terminal.sendText(`phpliteadmin ${document.uri.path}`);
-		terminal.show();
 
 		// Add the webview to our internal set of active webviews
 		this.webviews.add(document.uri, webviewPanel, terminal);
@@ -126,11 +125,39 @@ export class PhpLiteAdminProvider implements vscode.CustomEditorProvider<SQLiteD
 		// Construct preview url
 		const preview_url = `https://${process.env.CODESPACE_NAME}-8082.githubpreview.dev/`;
 
+		// Check to see if it is the first time launching web preview
+		let authorize = false;
+		const didLaunchPhpLiteAdmin = this._context.environmentVariableCollection.get("CS50_DID_START_PHPLITEADMIN");
+		if (didLaunchPhpLiteAdmin == undefined) {
+			authorize = true;
+			this._context.environmentVariableCollection.replace("CS50_DID_START_PHPLITEADMIN", String(Date.now()));
+		} else if (Date.now() - parseInt(didLaunchPhpLiteAdmin.value) > 86400) {
+			authorize = true;
+			this._context.environmentVariableCollection.replace("CS50_DID_START_PHPLITEADMIN", String(Date.now()));
+		}
+
 		// Load webview
-		webviewPanel.webview.html = this.getHtmlForWebview(webviewPanel.webview, preview_url);
+		webviewPanel.webview.html = this.getHtmlForWebview(webviewPanel.webview, preview_url, authorize);
 	}
 
-	private getHtmlForWebview(webview: vscode.Webview, preview_url: string): string {
+	private getHtmlForWebview(webview: vscode.Webview, preview_url: string, firstTimeLaunch: boolean): string {
+		if (firstTimeLaunch) {
+			
+			return /* html */`
+			<!DOCTYPE html>
+			<html lang="en">
+			<head>
+				<meta charset="UTF-8">
+				<meta name="viewport" content="width=device-width, initial-scale=1.0">
+				<title>phpLiteAdmin</title>
+			</head>
+			<body style="background-color: #ffffff;">
+			<div id=phpliteadmin></div>
+			<h3 style="color: #000000;">Please visit the following link to authorize GitHub Preview:</h3>
+			<h3 style="color: #000000;"><a href="${preview_url}">${preview_url}</a></h3>
+			</body>
+			</html>`;
+		}
 		
 		return /* html */`
 			<!DOCTYPE html>
@@ -140,26 +167,14 @@ export class PhpLiteAdminProvider implements vscode.CustomEditorProvider<SQLiteD
 				<meta name="viewport" content="width=device-width, initial-scale=1.0">
 				<title>phpLiteAdmin</title>
 			</head>
-			<body style="background-color: #ffffff">
-			<div id=phpliteadmin></div>
-			<h3 style="color: #000000">Starting phpLiteAdmin...</h3>
-			<h3 id=timeout style="color: #000000"></h3>
-			<hr/>
-			<h3 style="color: #000000">phpLiteAdmin running on:</h3>
-			<h3 style="color: #000000"><a href="${preview_url}">${preview_url}</a></h3>
+			<body style="background-color: #ffffff;">
+			<div id=phpliteadmin>
+				<iframe src=${preview_url} style="position:fixed; top:0; left:0; bottom:0; right:0; width:100%; height:100%; border:none; margin:0; padding:0; overflow:hidden;"></iframe>
+				<h4 style="position: fixed;margin-left:10px; left: 0; bottom: 0; width: 100%; color: #000000; z-index:999999;">
+					phpLiteAdmin running on: <a href="${preview_url}" style="text-decoration: none;">${preview_url}</a> <a href="${preview_url}" style="text-decoration: none;">(view in browser)</a>
+				</h4>
+			</div>
 			</body>
-			<script>
-			(function(){
-				setTimeout(() => {
-					console.log("attaching iframe")
-					document.getElementById("timeout").innerHTML='Attaching iframe...'
-					document.getElementById("phpliteadmin").innerHTML='<iframe src=${preview_url} style="position:fixed; top:0; left:0; bottom:0; right:0; width:100%; height:100%; border:none; margin:0; padding:0; overflow:hidden; z-index:999999;"></iframe>'
-				}, 3000)
-				setTimeout(() => {
-					document.getElementById("timeout").innerHTML='Failed to attach iframe, please visit the link below to view your database.'
-				}, 8000)
-			}())
-			</script>
 			</html>`;
 	}
 
