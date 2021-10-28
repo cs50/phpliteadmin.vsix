@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
-import { Disposable, disposeAll } from './dispose';
+import { exec } from 'child_process';
+import { Disposable } from './dispose';
 
 class SQLiteDocument extends Disposable implements vscode.CustomDocument {
 
@@ -72,12 +73,11 @@ export class PhpLiteAdminProvider implements vscode.CustomEditorProvider<SQLiteD
 		_token: vscode.CancellationToken
 	): Promise<void> {
 		
-		// Create new terminal and start php server
-		const terminal = vscode.window.createTerminal("phpLiteAdmin");
-		terminal.sendText(`phpliteadmin ${document.uri.path}`);
-
+		// Launch php server
+		exec(`PATH=$PATH:/home/ubuntu/.local/bin && phpliteadmin ${document.uri.path}`, {"env": process.env});
+		
 		// Add the webview to our internal set of active webviews
-		this.webviews.add(document.uri, webviewPanel, terminal);
+		this.webviews.add(document.uri, webviewPanel);
 
 		// Setup initial content for the webview
 		webviewPanel.webview.options = {
@@ -203,11 +203,8 @@ export class PhpLiteAdminProvider implements vscode.CustomEditorProvider<SQLiteD
 	/**
 	 * Add a new webview to the collection.
 	 */
-	public add(uri: vscode.Uri, webviewPanel: vscode.WebviewPanel, terminal:vscode.Terminal) {
+	public add(uri: vscode.Uri, webviewPanel: vscode.WebviewPanel) {
 		const entry = { resource: uri.toString(), webviewPanel };
 		this._webviews.add(entry);
-		webviewPanel.onDidDispose(() => {
-			terminal.dispose();
-		});
 	}
 }
