@@ -1,58 +1,31 @@
 import * as vscode from 'vscode';
 import { Disposable, disposeAll } from './dispose';
 
-interface SQLitDocumentDelegate {
-	getFileData(): Promise<Uint8Array>;
-}
-
 class SQLiteDocument extends Disposable implements vscode.CustomDocument {
 
 	static async create(
 		uri: vscode.Uri,
-		backupId: string | undefined,
-		delegate: SQLitDocumentDelegate,
+		backupId: string | undefined
 	): Promise<SQLiteDocument | PromiseLike<SQLiteDocument>> {
-		// If we have a backup, read that. Otherwise read the resource from the workspace
-		const dataFile = typeof backupId === 'string' ? vscode.Uri.parse(backupId) : uri;
-		const fileData = await SQLiteDocument.readFile(dataFile);
-		return new SQLiteDocument(uri, fileData, delegate);
-	}
-
-	private static async readFile(uri: vscode.Uri): Promise<Uint8Array> {
-		if (uri.scheme === 'untitled') {
-			return new Uint8Array();
-		}
-		return vscode.workspace.fs.readFile(uri);
+		return new SQLiteDocument(uri);
 	}
 
 	private readonly _uri: vscode.Uri;
 
-	private _documentData: Uint8Array;
-
-	private readonly _delegate: SQLitDocumentDelegate;
-
 	private constructor(
-		uri: vscode.Uri,
-		initialContent: Uint8Array,
-		delegate: SQLitDocumentDelegate
+		uri: vscode.Uri
 	) {
 		super();
 		this._uri = uri;
-		this._documentData = initialContent;
-		this._delegate = delegate;
 	}
 
 	public get uri() { return this._uri; }
-
-	public get documentData(): Uint8Array { return this._documentData; }
 
 	private readonly _onDidDispose = this._register(new vscode.EventEmitter<void>());
 	/**
 	 * Fired when the document is disposed of.
 	 */
 	public readonly onDidDispose = this._onDidDispose.event;
-
-
 }
 
 export class PhpLiteAdminProvider implements vscode.CustomEditorProvider<SQLiteDocument> {
@@ -89,18 +62,7 @@ export class PhpLiteAdminProvider implements vscode.CustomEditorProvider<SQLiteD
 		openContext: { backupId?: string },
 		_token: vscode.CancellationToken
 	): Promise<SQLiteDocument> {
-		const document: SQLiteDocument = await SQLiteDocument.create(uri, openContext.backupId, {
-			getFileData: async () => {
-				const webviewsForDocument = Array.from(this.webviews.get(document.uri));
-				if (!webviewsForDocument.length) {
-					throw new Error('Could not find webview to save for');
-				}
-				const panel = webviewsForDocument[0];
-				const response = await this.postMessageWithResponse<number[]>(panel, 'getFileData', {});
-				return new Uint8Array(response);
-			}
-		});
-
+		const document: SQLiteDocument = await SQLiteDocument.create(uri, openContext.backupId);
 		return document;
 	}
 
@@ -109,7 +71,7 @@ export class PhpLiteAdminProvider implements vscode.CustomEditorProvider<SQLiteD
 		webviewPanel: vscode.WebviewPanel,
 		_token: vscode.CancellationToken
 	): Promise<void> {
-
+		
 		// Create new terminal and start php server
 		const terminal = vscode.window.createTerminal("phpLiteAdmin");
 		terminal.sendText(`phpliteadmin ${document.uri.path}`);
