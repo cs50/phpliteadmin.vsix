@@ -2,6 +2,8 @@ import * as vscode from 'vscode';
 import { exec } from 'child_process';
 import { Disposable } from './dispose';
 
+const DEFAULT_PORT = 8082;
+
 class SQLiteDocument extends Disposable implements vscode.CustomDocument {
 
 	static async create(
@@ -206,5 +208,10 @@ export class PhpLiteAdminProvider implements vscode.CustomEditorProvider<SQLiteD
 	public add(uri: vscode.Uri, webviewPanel: vscode.WebviewPanel) {
 		const entry = { resource: uri.toString(), webviewPanel };
 		this._webviews.add(entry);
+		webviewPanel.onDidDispose(() => {
+			
+			// Kill process running on port 8082 and start WebSocket server
+			exec(`PATH=$PATH:/home/ubuntu/.local/bin && fuser -k ${DEFAULT_PORT}/tcp`, {"env": process.env});
+		});
 	}
 }
