@@ -76,7 +76,7 @@ export class PhpLiteAdminProvider implements vscode.CustomEditorProvider<SQLiteD
 	): Promise<void> {
 		
 		// Launch php server
-		exec(`PATH=$PATH:/home/ubuntu/.local/bin && phpliteadmin ${document.uri.path}`, {"env": process.env});
+		exec(`/opt/cs50/bin/phpliteadmin ${document.uri.path}`, {"env": process.env});
 		
 		// Add the webview to our internal set of active webviews
 		this.webviews.add(document.uri, webviewPanel);
