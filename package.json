@@ -42,8 +42,5 @@
         "@typescript-eslint/parser": "^4.16.0",
         "eslint": "^7.21.0",
         "typescript": "^4.2.2"
-    },
-    "dependencies": {
-        "vsce": "^1.100.1"
     }
 }
