@@ -105,6 +105,8 @@ export class PhpLiteAdminProvider implements vscode.CustomEditorProvider<SQLiteD
 	}
 
 	private getHtmlForWebview(webview: vscode.Webview, preview_url: string, firstTimeLaunch: boolean): string {
+		const local_url = `http://127.0.0.1:8082`;
+
 		if (firstTimeLaunch) {
 			
 			return /* html */`
@@ -118,7 +120,7 @@ export class PhpLiteAdminProvider implements vscode.CustomEditorProvider<SQLiteD
 			<body style="background-color: #ffffff;">
 			<div id=phpliteadmin></div>
 			<h3 style="color: #000000;">Please visit the following link to authorize GitHub Preview:</h3>
-			<h3 style="color: #000000;"><a href="${preview_url}">${preview_url}</a></h3>
+			<h3 style="color: #000000;"><a href="${local_url}">${preview_url}</a></h3>
 			</body>
 			</html>`;
 		}
@@ -137,7 +139,7 @@ export class PhpLiteAdminProvider implements vscode.CustomEditorProvider<SQLiteD
 					<h4 style="color: #000000;">Loading phpLiteAdmin in webview...</h4>
 				</div>
 					<h4 style="position: fixed;margin-left:10px; left: 0; bottom: 0; width: 100%; color: #000000; z-index:999999;">
-					phpLiteAdmin running on: <a href="${preview_url}" style="text-decoration: none;">${preview_url}</a> <a href="${preview_url}" style="text-decoration: none;">(view in browser)</a>
+					phpLiteAdmin running on: <a href="${local_url}" style="text-decoration: none;">${preview_url}</a> <a href="${local_url}" style="text-decoration: none;">(view in browser)</a>
 				</h4>
 			</div>
 			</body>
