@@ -16,6 +16,13 @@
     ],
     "main": "./out/extension.js",
     "contributes": {
+        "commands": [
+            {
+              "command": "phpliteadmin50.open",
+              "title": "Open in phpLiteAdmin",
+              "enablement": "phpliteadmin50:didActivateExtension"
+            }
+        ],
         "customEditors": [
             {
                 "viewType": "cs50.phpliteadmin",
@@ -25,9 +32,18 @@
                         "filenamePattern": "*.db"
                     }
                 ],
-                "priority": "default"
+                "priority": "option"
             }
-        ]
+        ],
+        "menus": {
+            "explorer/context": [
+                {
+                  "command": "phpliteadmin50.open",
+                  "when": "resourceExtname == '.db'",
+                  "group": "2_workspace@0"
+                }
+              ]
+        }
     },
     "scripts": {
         "vscode:prepublish": "npm run compile",
