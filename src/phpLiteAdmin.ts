@@ -88,7 +88,7 @@ export class PhpLiteAdminProvider implements vscode.CustomEditorProvider<SQLiteD
 
         // Construct preview url
         const local_url = `http://127.0.0.1:8082`;
-        const preview_url = `https://${process.env.CODESPACE_NAME}-8082.githubpreview.dev/`;
+        const preview_url = `https://${process.env.CODESPACE_NAME}-8082.${process.env['GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN'] || 'app.github.dev' }/`;
 
         // Load webview
         webviewPanel.webview.html = this.getHtmlForWebview(webviewPanel.webview, local_url, preview_url);
