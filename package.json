@@ -6,7 +6,7 @@
     "publisher": "CS50",
     "repository": "https://github.com/cs50/phpliteadmin.vsix",
     "engines": {
-        "vscode": "^1.80.0"
+        "vscode": "^1.81.0"
     },
     "categories": [
         "Education"
@@ -52,10 +52,10 @@
         "watch": "tsc -watch -p ./"
     },
     "devDependencies": {
-        "@types/node": "^20.4.5",
-        "@types/vscode": "^1.80.0",
-        "@typescript-eslint/eslint-plugin": "^6.2.1",
-        "@typescript-eslint/parser": "^6.2.1",
+        "@types/node": "^20.4.9",
+        "@types/vscode": "^1.81.0",
+        "@typescript-eslint/eslint-plugin": "^6.3.0",
+        "@typescript-eslint/parser": "^6.3.0",
         "eslint": "^8.46.0",
         "typescript": "^5.1.6"
     }
