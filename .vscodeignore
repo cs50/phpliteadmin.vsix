@@ -5,7 +5,7 @@ src/**
 .gitignore
 .yarnrc
 **/tsconfig.json
-**/.eslintrc.json
+**/eslint.config.mjs
 **/*.map
 **/*.ts
 finance/
